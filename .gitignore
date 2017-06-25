@@ -1,0 +1,8 @@
+.idea
+data/Final_Test/
+data/Final_Training/
+data/Online-Test-sort/
+data/*.tfrecords
+results/*
+*.pyc
+
