@@ -51,22 +51,22 @@ class Isling(object):
             x = self._conv('init_conv', x, 3, 3, 16, self._stride_arr(1))
 
         with tf.variable_scope('conv_1'):
-            x = self._res(x, 16, 32, self._stride_arr(1), 'conv_1_0', True)
-            x = self._res(x, 32, 32, self._stride_arr(1), 'conv_1_1')
-            x = self._res(x, 32, 32, self._stride_arr(1), 'conv_1_2')
-            x = self._res(x, 32, 32, self._stride_arr(1), 'conv_1_3')
+            x = self._res(x, 16, 64, self._stride_arr(1), 'conv_1_0', True)
+            x = self._res(x, 64, 64, self._stride_arr(1), 'conv_1_1')
+            x = self._max_pool(x, 'pool1')
 
         with tf.variable_scope('conv_2'):
-            x = self._res(x, 32, 64, self._stride_arr(2), 'conv_2_0')
-            x = self._res(x, 64, 64, self._stride_arr(1), 'conv_2_1')
-            x = self._res(x, 64, 64, self._stride_arr(1), 'conv_2_2')
-            x = self._res(x, 64, 64, self._stride_arr(1), 'conv_2_3')
+            x = self._res(x, 64, 128, self._stride_arr(1), 'conv_2_0')
+            x = self._res(x, 128, 128, self._stride_arr(1), 'conv_2_1')
+            x = self._res(x, 128, 128, self._stride_arr(1), 'conv_2_2')
+            x = self._max_pool(x, 'pool2')
 
         with tf.variable_scope('conv_3'):
-            x = self._res(x, 64, 128, self._stride_arr(2), 'conv_3_0')
-            x = self._res(x, 128, 128, self._stride_arr(1), 'conv_3_1')
-            x = self._res(x, 128, 128, self._stride_arr(1), 'conv_3_2')
-            x = self._res(x, 128, 128, self._stride_arr(1), 'conv_3_3')
+            x = self._res(x, 128, 256, self._stride_arr(1), 'conv_3_0')
+            x = self._res(x, 256, 256, self._stride_arr(1), 'conv_3_1')
+            x = self._res(x, 256, 256, self._stride_arr(1), 'conv_3_2')
+            x = self._res(x, 256, 256, self._stride_arr(1), 'conv_3_3')
+            x = self._max_pool(x, 'pool3')
 
         with tf.variable_scope('unit_last'):
             x = self._batch_norm('final_bn', x)
@@ -172,13 +172,18 @@ class Isling(object):
                     x = self._batch_norm('BN_share_activation', x)
                     x = self._relu(x)
 
-            with tf.variable_scope('layer1'):
-                x = self._conv('conv1', x, 3, in_filters, out_filters, stride)
+            with tf.variable_scope('sub1'):
+                x = self._conv('conv1', x, 1, in_filters, out_filters/2, stride)
 
-            with tf.variable_scope('layer2'):
-                x = self._batch_norm('BN_layer2', x)
+            with tf.variable_scope('sub2'):
+                x = self._batch_norm('BN_sub2', x)
                 x = self._relu(x)
-                x = self._conv('conv2', x, 3, out_filters, out_filters, [1, 1, 1, 1])
+                x = self._conv('conv2', x, 3, out_filters/2, out_filters/2, [1, 1, 1, 1])
+
+            with tf.variable_scope('sub3'):
+                x = self._batch_norm('BN_sub3', x)
+                x = self._relu(x)
+                x = self._conv('conv3', x, 1, out_filters/2, out_filters, [1, 1, 1, 1])
 
             with tf.variable_scope('add'):
                 if in_filters != out_filters:
